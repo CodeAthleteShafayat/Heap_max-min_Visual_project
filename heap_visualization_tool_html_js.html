@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Heap Visualization</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f4f6f8;
+    }
+    h1 { margin-top: 20px; }
+    .controls {
+      margin: 20px;
+    }
+    input, select, button {
+      padding: 8px;
+      margin: 5px;
+      font-size: 14px;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      background: white;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Heap Visualization (Min / Max Heap)</h1>
+
+<div class="controls">
+  <input type="number" id="valueInput" placeholder="Enter value">
+  <select id="heapType">
+    <option value="min">Min Heap</option>
+    <option value="max">Max Heap</option>
+  </select>
+  <button onclick="insertValue()">Insert</button>
+</div>
+
+<canvas id="canvas" width="900" height="500"></canvas>
+
+<script>
+  let heap = [];
+
+  function insertValue() {
+    const input = document.getElementById("valueInput");
+    const type = document.getElementById("heapType").value;
+    const val = parseInt(input.value);
+
+    if (isNaN(val)) return;
+
+    heap.push(val);
+    heapifyUp(heap.length - 1, type);
+    input.value = "";
+
+    drawHeap();
+  }
+
+  function heapifyUp(index, type) {
+    if (index === 0) return;
+
+    let parent = Math.floor((index - 1) / 2);
+
+    if (
+      (type === "min" && heap[index] < heap[parent]) ||
+      (type === "max" && heap[index] > heap[parent])
+    ) {
+      [heap[index], heap[parent]] = [heap[parent], heap[index]];
+      heapifyUp(parent, type);
+    }
+  }
+
+  function drawHeap() {
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (heap.length === 0) return;
+
+    const levelHeight = 70;
+
+    function drawNode(index, x, y, gap) {
+      if (index >= heap.length) return;
+
+      ctx.beginPath();
+      ctx.arc(x, y, 20, 0, 2 * Math.PI);
+      ctx.fillStyle = "#4CAF50";
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "white";
+      ctx.fillText(heap[index], x - 10, y + 5);
+
+      let left = 2 * index + 1;
+      let right = 2 * index + 2;
+
+      if (left < heap.length) {
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - gap, y + levelHeight);
+        ctx.stroke();
+        drawNode(left, x - gap, y + levelHeight, gap / 1.5);
+      }
+
+      if (right < heap.length) {
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + gap, y + levelHeight);
+        ctx.stroke();
+        drawNode(right, x + gap, y + levelHeight, gap / 1.5);
+      }
+    }
+
+    ctx.font = "14px Arial";
+    drawNode(0, canvas.width / 2, 40, 150);
+  }
+</script>
+
+</body>
+</html>
